@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fretboard Chord Visualizer</title>
+  <script type="text/javascript">
+    var params = new URLSearchParams(window.location.search.slice(1));
+
+    const chords = {
+      "maj": [0, 4, 7],
+      "min": [0, 3, 7],
+      "dim": [0, 3, 6],
+    };
+
+    // const scales = {
+    //   "Major":            [0, 2, 4, 5, 7, 9, 11],
+    //   "Minor":            [0, 2, 3, 5 ,7, 8, 10],
+    //   "Major Pentatonic": [0, 2, 4, 7, 9],
+    //   "Minor Pentatonic": [0, 3, 5, 7, 10],
+    // };
+
+    const tunings = {
+      "E Standard":  [7, 0, 5, 10, 2, 7],
+      "Drop D":      [5, 0, 5, 10, 2, 7],
+      "Eb Standard": [6, 11, 4, 9, 1, 6],
+      "D Standard":  [5, 10, 3, 8, 0, 5],
+    };
+  
+    // todo: note names are dependent on key...
+    const notesNames = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+
+    function populateFormElements() {
+      var select = document.getElementById('key');
+
+      notesNames.forEach(key => {  
+        var opt = document.createElement('option');
+        opt.value = key;
+        opt.innerHTML = key;
+        if (params.get('key') == key) { opt.selected = true; }
+        select.appendChild(opt);
+      });
+
+      var select = document.getElementById('chord');
+      for (var chord in chords) {
+        var opt = document.createElement('option');
+        opt.value = chord;
+        opt.innerHTML = chord;
+        if (params.get('chord') == chord) { opt.selected = true; }
+        select.appendChild(opt);
+      };
+
+      var select = document.getElementById('tuning');
+      for (var tuning in tunings) {
+        var opt = document.createElement('option');
+        opt.value = tuning;
+        opt.innerHTML = tuning;
+        if (params.get('tuning') == tuning) { opt.selected = true; }
+        select.appendChild(opt);
+      };
+    }
+  
+    function getNotesInChord()
+    {
+      var keyoffset = document.getElementById("key").selectedIndex;
+      var chordnotes = chords[document.getElementById("chord").value];
+      
+      for(var i=0;i<chordnotes.length;i++) { chordnotes[i] = (chordnotes[i] + keyoffset) % 12; }
+      return chordnotes
+    }
+
+    function draw() {
+      var canvas = document.getElementById('tutorial');
+      if (canvas.getContext) {
+        var ctx = canvas.getContext('2d');
+        ctx.font = '10px serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        var tuning = tunings[document.getElementById("tuning").value];
+        var chord = getNotesInChord();
+
+        // draw fretboard
+        var xspace = 20, yspace = 30;
+        var xoff = 30, yoff = 35;
+        var xnum = tuning.length; ynum = 12;
+        var circsize = 8;
+        var dotsize = 5;
+
+        ctx.beginPath();
+        ctx.fillStyle = 'black';
+        ctx.fillRect(xoff, yoff, (xnum-1)*xspace, 5);
+
+        for (var i = 0; i < xnum; i++)
+        {
+          ctx.beginPath();
+          ctx.moveTo(xoff + i*xspace, yoff);
+          ctx.lineTo(xoff + i*xspace, yoff + ynum*yspace);
+          ctx.stroke();
+        }
+        for (var j = 1; j < (ynum + 1); j++)
+        {
+          // fret markers
+          if (j % 12 == 0 && j != 0)
+          {
+            ctx.beginPath();
+            ctx.arc(xoff + 1.5*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(xoff + 3.5*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+            ctx.fill();
+          }
+          if ([3, 5, 7, 9].includes(j % 12))
+          {
+            ctx.beginPath();
+            ctx.arc(xoff + 2.5*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+            ctx.fill();
+          }
+          
+          ctx.beginPath();
+          ctx.moveTo(xoff, yoff + j*yspace);
+          ctx.lineTo(xoff + (xnum-1)*xspace, yoff + j*yspace);
+          ctx.stroke();
+          ctx.fillText(j, xoff-15,  yoff + (j - 0.5)*yspace);
+        }
+        
+  
+        // draw notes
+        ctx.textAlign = 'center';
+        for (var i = 0; i < xnum; i++)
+        {
+          for (var j = 0; j <= ynum; j++)
+          {
+            var note = (tuning[i] + j) % 12;
+
+            if (chord.includes(note))
+            {
+              ctx.beginPath();
+              ctx.strokeStyle = (note == chord[0]) ? 'white' : 'black';
+              ctx.fillStyle   = (note == chord[0]) ? 'red' : 'white';
+
+              ctx.arc(xoff + i*xspace, yoff + (j - 0.5)*yspace, circsize, 0, Math.PI * 2, true);
+              ctx.fill();
+              ctx.stroke();
+              
+              ctx.fillStyle = ctx.strokeStyle;
+              ctx.fillText(notesNames[note], xoff + i*xspace,  yoff + (j - 0.5)*yspace);
+            }
+            else if (j == 0)
+            {
+              ctx.beginPath();
+              ctx.fillStyle = 'grey';
+              ctx.fillText(notesNames[note], xoff + i*xspace,  yoff - 0.5*yspace);
+            }
+          }
+        }
+      }
+    }
+
+    function prepare()
+    {
+      populateFormElements();
+      draw();
+    }
+  </script>
+
+  <style type="text/css">
+    canvas { border: 1px solid black; }
+  </style>
+</head>
+
+<body onload="prepare();">
+  <form id="ChordForm" method="get" onchange="submit()">
+    <select name="tuning" id="tuning"></select>
+    <br />
+    <select name="key" id="key"></select>
+    <select name="chord" id="chord"></select>
+  </form>
+  <br />
+  <canvas id="tutorial" width="150" height="410"></canvas>
+</body>
+</html>
