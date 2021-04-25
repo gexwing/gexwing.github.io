@@ -3,7 +3,15 @@
 <head>
   <title>Fretboard Chord Visualizer</title>
   <script type="text/javascript">
+    // URL parameters
     var params = new URLSearchParams(window.location.search.slice(1));
+
+    // fretboard dimensions
+    var xspace = 20, yspace = 30;
+    var xoff = 30, yoff = 35;
+    var ynum = 12;
+    var circsize = 9;
+    var dotsize = 5;
 
     const chords = {
       // Triads
@@ -81,22 +89,16 @@
     }
 
     function draw() {
-      var canvas = document.getElementById('tutorial');
+      var canvas = document.getElementById('cFretboard');
       if (canvas.getContext) {
         var ctx = canvas.getContext('2d');
-        ctx.font = '10px serif';
+        ctx.font = '11px serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
 
         var tuning = tunings[document.getElementById("tuning").value];
         var chord = getNotesInChord();
-
-        // draw fretboard
-        var xspace = 20, yspace = 30;
-        var xoff = 30, yoff = 35;
-        var xnum = tuning.length; ynum = 12;
-        var circsize = 8;
-        var dotsize = 5;
+        var xnum = tuning.length;
 
         ctx.beginPath();
         ctx.fillStyle = 'black';
@@ -114,18 +116,18 @@
           // fret markers
           if (j % 12 == 0 && j != 0)
           {
-            ctx.beginPath();
-            ctx.arc(xoff + 1.5*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+            ctx.beginPath(); xnum
+            ctx.arc(xoff + xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
             ctx.fill();
 
             ctx.beginPath();
-            ctx.arc(xoff + 3.5*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+            ctx.arc(xoff + (xnum-2)*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
             ctx.fill();
           }
           if ([3, 5, 7, 9].includes(j % 12))
           {
             ctx.beginPath();
-            ctx.arc(xoff + 2.5*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+            ctx.arc(xoff + (xnum-1)/2*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
             ctx.fill();
           }
           
@@ -169,26 +171,48 @@
       }
     }
 
+    function clear()
+    {
+      var canvas = document.getElementById('cFretboard');
+      if (canvas.getContext) {
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fill();
+      }
+
+      //resize  // width="150" height="410"
+      var xnum = tunings[document.getElementById("tuning").value].length;
+      canvas.width = xoff + xnum*xspace;
+      canvas.height = yoff + (ynum+1)*yspace;
+    }
+
     function prepare()
     {
       populateFormElements();
+      update();
+    }
+
+    function update()
+    {
+      clear();
       draw();
     }
   </script>
-
+  
   <style type="text/css">
     canvas { border: 1px solid black; }
   </style>
+
 </head>
 
 <body onload="prepare();">
-  <form id="ChordForm" method="get" onchange="submit()">
+  <form id="ChordForm" method="get" onchange="submit();">
     <select name="tuning" id="tuning"></select>
     <br />
     <select name="key" id="key"></select>
     <select name="chord" id="chord"></select>
   </form>
   <br />
-  <canvas id="tutorial" width="150" height="410"></canvas>
+  <canvas id="cFretboard"></canvas>
 </body>
 </html>
