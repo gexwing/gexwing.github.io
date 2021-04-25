@@ -6,9 +6,21 @@
     var params = new URLSearchParams(window.location.search.slice(1));
 
     const chords = {
+      // Triads
       "maj": [0, 4, 7],
       "min": [0, 3, 7],
       "dim": [0, 3, 6],
+      // Suspended
+      "sus4": [0, 5, 7],
+      "sus2": [0, 2, 7],
+      // 7th Chords
+      "maj^7": [0, 4, 7, 11],
+      "min^7": [0, 3, 7, 10],
+      "^7": [0, 4, 7, 10],
+      "dim^7": [0, 3, 6, 9],
+      "min^7b5": [0, 3, 6, 10],
+      "min^maj7": [0, 3, 7, 11],
+      "maj^7b5": [0, 4, 8, 11],
     };
 
     // const scales = {
