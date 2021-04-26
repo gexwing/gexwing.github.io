@@ -50,13 +50,13 @@
     const notesNames = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
 
     function populateFormElements() {
-      var select = document.getElementById('key');
+      var select = document.getElementById("rootnote");
 
-      notesNames.forEach(key => {  
+      notesNames.forEach(note => {  
         var opt = document.createElement('option');
-        opt.value = key;
-        opt.innerHTML = key;
-        if (params.get('key') == key) { opt.selected = true; }
+        opt.value = note;
+        opt.innerHTML = note;
+        if (params.get("rootnote") == note) { opt.selected = true; }
         select.appendChild(opt);
       });
 
@@ -81,7 +81,7 @@
   
     function getNotesInChord()
     {
-      var keyoffset = document.getElementById("key").selectedIndex;
+      var keyoffset = document.getElementById("rootnote").selectedIndex;
       var chordnotes = chords[document.getElementById("chord").value];
       
       for(var i=0;i<chordnotes.length;i++) { chordnotes[i] = (chordnotes[i] + keyoffset) % 12; }
@@ -209,7 +209,7 @@
   <form id="ChordForm" method="get" onchange="submit();">
     <select name="tuning" id="tuning"></select>
     <br />
-    <select name="key" id="key"></select>
+    <select name="rootnote" id="rootnote"></select>
     <select name="chord" id="chord"></select>
   </form>
   <br />
