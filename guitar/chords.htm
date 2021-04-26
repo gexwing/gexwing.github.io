@@ -3,157 +3,48 @@
 <head>
   <title>Fretboard Chord Visualizer</title>
   <script type="text/javascript" src="music-data.js"></script>
+  <script type="text/javascript" src="cFretboard.js"></script>
   <script type="text/javascript">
-    // URL parameters
-    var params = new URLSearchParams(window.location.search.slice(1));
-
-    // fretboard dimensions
-    var xspace = 20, yspace = 30;
-    var xoff = 30, yoff = 35;
-    var ynum = 12;
-    var circsize = 9;
-    var dotsize = 5;
 
     function populateFormElements() {
-      var select = document.getElementById("rootnote");
+      let params = new URLSearchParams(window.location.search.slice(1));
 
-      notesNames.forEach(note => {  
-        var opt = document.createElement('option');
-        opt.value = note;
-        opt.innerHTML = note;
-        if (params.get("rootnote") == note) { opt.selected = true; }
-        select.appendChild(opt);
-      });
-
-      var select = document.getElementById('chord');
-      for (var chord in chords) {
-        var opt = document.createElement('option');
-        opt.value = chord;
-        opt.innerHTML = chord;
-        if (params.get('chord') == chord) { opt.selected = true; }
-        select.appendChild(opt);
+      function popHelper(selectid, dataarray)
+      {
+        let select = document.getElementById(selectid);
+        dataarray.forEach(option => {
+          let optionelement = document.createElement('option');
+          optionelement.value = option;
+          optionelement.innerHTML = option;
+          if (params.get(selectid) == option) { optionelement.selected = true; }
+          select.appendChild(optionelement);
+        });
       };
 
-      var select = document.getElementById('tuning');
-      for (var tuning in tunings) {
-        var opt = document.createElement('option');
-        opt.value = tuning;
-        opt.innerHTML = tuning;
-        if (params.get('tuning') == tuning) { opt.selected = true; }
-        select.appendChild(opt);
-      };
-    }
+      popHelper("tuning", Object.keys(tunings));
+
+      popHelper("key", notesNames);
+      popHelper("scale", Object.keys(scales));
+
+      popHelper("rootnote", notesNames);
+      popHelper("chord", Object.keys(chords_basic));
+      popHelper("chord", Object.keys(chords_sus));
+      popHelper("chord", Object.keys(chords_7th));
+    };
   
     function getNotesInChord()
     {
-      var keyoffset = document.getElementById("rootnote").selectedIndex;
-      var chordnotes = chords[document.getElementById("chord").value];
+      let keyoffset = document.getElementById("rootnote").selectedIndex;
+      let chordnotes = chords_all[document.getElementById("chord").value];
       
-      for(var i=0;i<chordnotes.length;i++) { chordnotes[i] = (chordnotes[i] + keyoffset) % 12; }
+      for(let i=0;i<chordnotes.length;i++) { chordnotes[i] = (chordnotes[i] + keyoffset) % 12; }
       return chordnotes
-    }
-
-    function draw() {
-      var canvas = document.getElementById('cFretboard');
-      if (canvas.getContext) {
-        var ctx = canvas.getContext('2d');
-        ctx.font = '11px serif';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-
-        var tuning = tunings[document.getElementById("tuning").value];
-        var chord = getNotesInChord();
-        var xnum = tuning.length;
-
-        ctx.beginPath();
-        ctx.fillStyle = 'black';
-        ctx.fillRect(xoff, yoff, (xnum-1)*xspace, 5);
-
-        for (var i = 0; i < xnum; i++)
-        {
-          ctx.beginPath();
-          ctx.moveTo(xoff + i*xspace, yoff);
-          ctx.lineTo(xoff + i*xspace, yoff + ynum*yspace);
-          ctx.stroke();
-        }
-        for (var j = 1; j < (ynum + 1); j++)
-        {
-          // fret markers
-          if (j % 12 == 0 && j != 0)
-          {
-            ctx.beginPath();
-            ctx.arc(xoff + xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(xoff + (xnum-2)*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
-            ctx.fill();
-          }
-          if ([3, 5, 7, 9].includes(j % 12))
-          {
-            ctx.beginPath();
-            ctx.arc(xoff + (xnum-1)/2*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
-            ctx.fill();
-          }
-          
-          ctx.beginPath();
-          ctx.moveTo(xoff, yoff + j*yspace);
-          ctx.lineTo(xoff + (xnum-1)*xspace, yoff + j*yspace);
-          ctx.stroke();
-          ctx.fillText(j, xoff-15,  yoff + (j - 0.5)*yspace);
-        }
-        
-  
-        // draw notes
-        ctx.textAlign = 'center';
-        for (var i = 0; i < xnum; i++)
-        {
-          for (var j = 0; j <= ynum; j++)
-          {
-            var note = (tuning[i] + j) % 12;
-
-            if (chord.includes(note))
-            {
-              ctx.beginPath();
-              ctx.strokeStyle = (note == chord[0]) ? 'white' : 'black';
-              ctx.fillStyle   = (note == chord[0]) ? 'red' : 'white';
-
-              ctx.arc(xoff + i*xspace, yoff + (j - 0.5)*yspace, circsize, 0, Math.PI * 2, true);
-              ctx.fill();
-              ctx.stroke();
-              
-              ctx.fillStyle = ctx.strokeStyle;
-              ctx.fillText(notesNames[note], xoff + i*xspace,  yoff + (j - 0.5)*yspace);
-            }
-            else if (j == 0)
-            {
-              ctx.beginPath();
-              ctx.fillStyle = 'grey';
-              ctx.fillText(notesNames[note], xoff + i*xspace,  yoff - 0.5*yspace);
-            }
-          }
-        }
-      }
-    }
-
-    function clear()
-    {
-      var canvas = document.getElementById('cFretboard');
-      if (canvas.getContext) {
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fill();
-      }
-
-      //resize  // width="150" height="410"
-      var xnum = tunings[document.getElementById("tuning").value].length;
-      canvas.width = xoff + xnum*xspace;
-      canvas.height = yoff + (ynum+1)*yspace;
     }
 
     function prepare()
     {
       populateFormElements();
+      updatequickchords();
       update();
     }
 
@@ -162,22 +53,94 @@
       clear();
       draw();
     }
+
+    function updatequickchords()
+    {
+      let keyoffset = document.getElementById("key").selectedIndex;
+      let notes = scales[document.getElementById("scale").value];
+
+      document.getElementById('quickchords_basic').innerText = null;
+      document.getElementById('quickchords_sus').innerText = null;
+      document.getElementById('quickchords_7th').innerText = null;
+
+      for ([root, cname] of findChords(chords_basic, notes.map(note => (note + keyoffset) % 12)))
+      {
+        let option = document.createElement("option");
+        option.innerHTML = notesNames[root] + cname;
+        option.dataset.root = root;
+        option.dataset.cname = cname;
+        document.getElementById("quickchords_basic").appendChild(option);
+      }
+      for ([root, cname] of findChords(chords_sus, notes.map(note => (note + keyoffset) % 12)))
+      {
+        let option = document.createElement("option");
+        option.innerHTML = notesNames[root] + cname;
+        option.dataset.root = root;
+        option.dataset.cname = cname;
+        document.getElementById("quickchords_sus").appendChild(option);
+      }
+      for ([root, cname] of findChords(chords_7th, notes.map(note => (note + keyoffset) % 12)))
+      {
+        let option = document.createElement("option");
+        option.innerHTML = notesNames[root] + cname;
+        option.dataset.root = root;
+        option.dataset.cname = cname;
+        document.getElementById("quickchords_7th").appendChild(option);
+      }
+    }
+  
+    function quickchord_selected(obj)
+    {
+      let opt_root = document.querySelector('#rootnote [value="' + notesNames[obj.options[obj.selectedIndex].dataset.root] + '"]');
+      let opt_cname = document.querySelector('#chord [value="' + obj.options[obj.selectedIndex].dataset.cname + '"]');
+
+      if ((opt_root) && (opt_cname))
+      {
+        opt_root.selected = true;
+        opt_cname.selected = true;
+      }
+
+      update();
+    }
+
   </script>
   
   <style type="text/css">
     canvas { border: 1px solid black; }
+    form div { width: 300px; }
+    /* div select { width: 100%; } */
   </style>
 
 </head>
 
 <body onload="prepare();">
-  <form id="ChordForm" method="get" onchange="submit();">
-    <select name="tuning" id="tuning"></select>
+  <form id="ChordForm" method="get">
+    <div>
+      <select name="key" id="key" onchange="updatequickchords();"></select>
+      <select name="scale" id="scale" onchange="updatequickchords();"></select>
+    </div>
+
+    <div>
+      <select size=8 onchange="quickchord_selected(this);";>
+        <option></option>
+        <optgroup id="quickchords_basic" label="Basic Chords"></optgroup>
+        <optgroup id="quickchords_sus" label="Sus Chords"></optgroup>
+        <optgroup id="quickchords_7th" label="7th Chords"></optgroup>
+      </select>
+    </div>
+
     <br />
-    <select name="rootnote" id="rootnote"></select>
-    <select name="chord" id="chord"></select>
+
+    <div>
+      <select name="rootnote" id="rootnote" onchange="update();"></select>
+      <select name="chord" id="chord" onchange="update();"></select>
+    </div>
+
+    <div>
+      <select name="tuning" id="tuning" onchange="update();"></select>
+    </div>
+    
   </form>
-  <br />
   <canvas id="cFretboard"></canvas>
 </body>
 </html>

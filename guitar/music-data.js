@@ -16,16 +16,20 @@ var scales = {
   "Minor Pentatonic": [0, 3, 5, 7, 10],
 };
 
-var chords = {
+var chords_basic = {
   // Triads
   "maj": [0, 4, 7],
   "min": [0, 3, 7],
   "dim": [0, 3, 6],
+};
 
+var chords_sus = {
   // Suspended
   "sus4": [0, 5, 7],
   "sus2": [0, 2, 7],
+};
 
+var chords_7th = {
   // 7th Chords
   "maj^7": [0, 4, 7, 11],
   "min^7": [0, 3, 7, 10],
@@ -35,3 +39,21 @@ var chords = {
   "min^maj7": [0, 3, 7, 11],
   "maj^7b5": [0, 4, 8, 11],
 };
+
+var chords_all = Object.assign({}, chords_basic, chords_sus, chords_7th);
+
+// find all possible chords in a set of notes/scale
+function findChords(chorddict, notes)
+{
+  let result = [];
+  for (let root of notes)
+  {
+    for (let [cname, cnotes] of Object.entries(chorddict))
+    {
+      if (cnotes.every(val => notes.includes((val + root + 12) % 12))) {
+        result.push([root, cname]);
+      }
+    }
+  }
+  return result;
+}
