@@ -32,29 +32,26 @@
       popHelper("chord", Object.keys(chords_7th));
     };
   
-    function getNotesInChord()
-    {
-      let keyoffset = document.getElementById("rootnote").selectedIndex;
-      let chordnotes = chords_all[document.getElementById("chord").value];
-      
-      for(let i=0;i<chordnotes.length;i++) { chordnotes[i] = (chordnotes[i] + keyoffset) % 12; }
-      return chordnotes
-    }
-
     function prepare()
     {
       populateFormElements();
-      updatequickchords();
+      quickchordsUpdate();
       update();
     }
 
     function update()
     {
-      clear();
-      draw();
+      let canvas = document.getElementById('cFretboard');
+      let strings = tunings[document.getElementById("tuning").value];
+      let root = document.getElementById("rootnote").selectedIndex;
+      let notes = chords_all[document.getElementById("chord").value].map(
+        note => (note + root) % 12
+      );
+
+      cFretDraw(canvas, strings, notes);
     }
 
-    function updatequickchords()
+    function quickchordsUpdate()
     {
       let keyoffset = document.getElementById("key").selectedIndex;
       let notes = scales[document.getElementById("scale").value];
@@ -89,18 +86,17 @@
       }
     }
   
-    function quickchord_selected(obj)
+    function quickchordSelected(obj)
     {
-      let opt_root = document.querySelector('#rootnote [value="' + notesNames[obj.options[obj.selectedIndex].dataset.root] + '"]');
-      let opt_cname = document.querySelector('#chord [value="' + obj.options[obj.selectedIndex].dataset.cname + '"]');
+      let opt_root = document.querySelector('select#rootnote [value="' + notesNames[obj.options[obj.selectedIndex].dataset.root] + '"]');
+      let opt_cname = document.querySelector('select#chord [value="' + obj.options[obj.selectedIndex].dataset.cname + '"]');
 
       if ((opt_root) && (opt_cname))
       {
         opt_root.selected = true;
         opt_cname.selected = true;
+        update();
       }
-
-      update();
     }
 
   </script>
@@ -108,21 +104,21 @@
   <style type="text/css">
     canvas { border: 1px solid black; }
     form div { width: 300px; }
-    /* div select { width: 100%; } */
+    div select { width: 100%; }
   </style>
 
 </head>
 
 <body onload="prepare();">
   <form id="ChordForm" method="get">
-    <div>
-      <select name="key" id="key" onchange="updatequickchords();"></select>
-      <select name="scale" id="scale" onchange="updatequickchords();"></select>
+    <div style="float: left;">
+      <select name="key" id="key" onchange="quickchordsUpdate();"></select>
+      <select name="scale" id="scale" onchange="quickchordsUpdate();"></select>
     </div>
 
     <div>
-      <select size=8 onchange="quickchord_selected(this);";>
-        <option></option>
+      <select size=8 onchange="quickchordSelected(this);";>
+        <!-- <option></option> -->
         <optgroup id="quickchords_basic" label="Basic Chords"></optgroup>
         <optgroup id="quickchords_sus" label="Sus Chords"></optgroup>
         <optgroup id="quickchords_7th" label="7th Chords"></optgroup>
