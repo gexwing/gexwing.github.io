@@ -30,6 +30,11 @@
       popHelper("chord", Object.keys(chords_basic));
       popHelper("chord", Object.keys(chords_sus));
       popHelper("chord", Object.keys(chords_7th));
+
+      for (const rb of document.querySelectorAll('input[name="drawSelect"]')) {
+          console.log(rb);
+          if (params.get("drawSelect") == rb.value) { rb.checked = true; }
+      };
     };
   
     function prepare()
@@ -43,10 +48,22 @@
     {
       let canvas = document.getElementById('cFretboard');
       let strings = tunings[document.getElementById("tuning").value];
-      let root = document.getElementById("rootnote").selectedIndex;
-      let notes = chords_all[document.getElementById("chord").value].map(
-        note => (note + root) % 12
-      );
+      let notes = [];
+
+      if (document.getElementById('drawSelectScale').checked)
+      {
+        let key = document.getElementById("key").selectedIndex;
+        notes = scales[document.getElementById("scale").value].map(
+          note => (note + key) % 12
+        );
+      }
+      else if (document.getElementById('drawSelectChord').checked == true)
+      {
+        let root = document.getElementById("rootnote").selectedIndex;
+        notes = chords_all[document.getElementById("chord").value].map(
+          note => (note + root) % 12
+        );
+      }
 
       cFretDraw(canvas, strings, notes);
     }
@@ -102,22 +119,38 @@
   </script>
   
   <style type="text/css">
-    canvas { border: 1px solid black; }
-    form div { width: 300px; }
-    div select { width: 100%; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: smaller;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    form#ChordForm {
+      float: left;
+      width: 200px;
+    }
+
+    form#ChordForm div { display: flex; }
+    form#ChordForm div select:last-child { flex-grow: 1; }
+    canvas#cFretboard { float:left; margin-left: 50px; }
+    form#ChordForm input[type=text] { width: 75%; }
   </style>
 
 </head>
 
 <body onload="prepare();">
-  <form id="ChordForm" method="get">
-    <div style="float: left;">
+  <form id="ChordForm" method="get" onchange="update();">
+    <h3>Scale Select</h3>
+    <div>
       <select name="key" id="key" onchange="quickchordsUpdate();"></select>
       <select name="scale" id="scale" onchange="quickchordsUpdate();"></select>
     </div>
-
     <div>
-      <select size=8 onchange="quickchordSelected(this);";>
+      <select id="quickchords" size=8 onchange="quickchordSelected(this);";>
         <!-- <option></option> -->
         <optgroup id="quickchords_basic" label="Basic Chords"></optgroup>
         <optgroup id="quickchords_sus" label="Sus Chords"></optgroup>
@@ -125,18 +158,33 @@
       </select>
     </div>
 
+    <h3>Chord Select</h3>
+    <div>
+      <select name="rootnote" id="rootnote"></select>
+      <select name="chord" id="chord"></select>
+    </div>
+
+    <h3>Drawing Options</h3>
+    <div>
+      <select name="tuning" id="tuning"></select>
+    </div>
     <br />
-
     <div>
-      <select name="rootnote" id="rootnote" onchange="update();"></select>
-      <select name="chord" id="chord" onchange="update();"></select>
+      <div style="width: 50%;">
+        <input type="radio" id="drawSelectScale" name="drawSelect" value="scale">
+        <label for="drawSelectScale">Scale</label>
+      </div>
+      <div>
+        <input type="radio" id="drawSelectChord" name="drawSelect" value="chord">
+        <label for="drawSelectChord">Chord </label>
+      </div>
     </div>
-
+    <br />
     <div>
-      <select name="tuning" id="tuning" onchange="update();"></select>
+      <button>Generate URL</button>
     </div>
-    
   </form>
+  <br />
   <canvas id="cFretboard"></canvas>
 </body>
 </html>
