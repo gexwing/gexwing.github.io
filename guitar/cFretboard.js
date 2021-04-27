@@ -1,14 +1,14 @@
-// fretboard dimensions
-const yspace = 20;
-const xspace = 30;
-const yoff = 20;
-const xoff = 35;
-const fretnum = 24;
-const circsize = 9;
-const dotsize = 5;
-
 function cFretDraw(canvas, strings, notes)
 {
+  // fretboard dimensions
+  const yspace = 20;
+  const xspace = 30;
+  const yoff = 20;
+  const xoff = 35;
+  const fretnum = 24;
+  const circsize = 9;
+  const dotsize = 5;
+
   if (canvas.getContext)
   {
     // Resize
