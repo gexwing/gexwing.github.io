@@ -32,7 +32,6 @@
       popHelper("chord", Object.keys(chords_7th));
 
       for (const rb of document.querySelectorAll('input[name="drawSelect"]')) {
-          console.log(rb);
           if (params.get("drawSelect") == rb.value) { rb.checked = true; }
       };
     };
@@ -171,7 +170,7 @@
     <br />
     <div>
       <div style="width: 50%;">
-        <input type="radio" id="drawSelectScale" name="drawSelect" value="scale">
+        <input type="radio" id="drawSelectScale" name="drawSelect" value="scale" checked>
         <label for="drawSelectScale">Scale</label>
       </div>
       <div>
