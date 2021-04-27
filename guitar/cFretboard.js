@@ -1,7 +1,9 @@
 // fretboard dimensions
-const xspace = 20, yspace = 30;
-const xoff = 30, yoff = 35;
-const ynum = 12;
+const yspace = 20;
+const xspace = 30;
+const yoff = 20;
+const xoff = 35;
+const fretnum = 24;
 const circsize = 9;
 const dotsize = 5;
 
@@ -10,8 +12,8 @@ function cFretDraw(canvas, strings, notes)
   if (canvas.getContext)
   {
     // Resize
-    canvas.width = xoff + strings.length*xspace;
-    canvas.height = yoff + (ynum+1)*yspace;
+    canvas.height = yoff + strings.length*yspace;
+    canvas.width = xoff + (fretnum + 1)*xspace;
 
     // Clear
     var ctx = canvas.getContext('2d');
@@ -19,48 +21,47 @@ function cFretDraw(canvas, strings, notes)
 
     // Default Values
     ctx.font = '11px serif';
-    ctx.textAlign = 'right';
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
     ctx.beginPath();
     ctx.fillStyle = 'black';
-    ctx.fillRect(xoff, yoff, (strings.length-1)*xspace, 5);
+    ctx.fillRect(xoff, canvas.height - yoff, 5, -(strings.length-1)*yspace);
 
     for (var i = 0; i < strings.length; i++)
     {
       ctx.beginPath();
-      ctx.moveTo(xoff + i*xspace, yoff);
-      ctx.lineTo(xoff + i*xspace, yoff + ynum*yspace);
+      ctx.moveTo(xoff, canvas.height - (yoff + i*yspace));
+      ctx.lineTo(xoff + fretnum*xspace, canvas.height - (yoff + i*yspace));
       ctx.stroke();
     }
-    for (var j = 1; j < (ynum + 1); j++)
+    for (var j = 1; j < (fretnum + 1); j++)
     {
       // fret markers
-      if (j % 12 == 0 && j != 0)
+      if ((j > 0) && (j % 12 == 0))
       {
         ctx.beginPath();
-        ctx.arc(xoff + xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+        ctx.arc(xoff + (j - 0.5)*xspace, canvas.height - (yoff + yspace), dotsize, 0, Math.PI * 2, true);
         ctx.fill();
       }
       else if ([3, 5, 7, 9].includes(j % 12))
       {
         ctx.beginPath();
-        ctx.arc(xoff + (strings.length-1)/2*xspace, yoff + (j - 0.5)*yspace, dotsize, 0, Math.PI * 2, true);
+        ctx.arc(xoff + (j - 0.5)*xspace, canvas.height - (yoff + (strings.length-1)/2*yspace), dotsize, 0, Math.PI * 2, true);
         ctx.fill();
       }
       
       ctx.beginPath();
-      ctx.moveTo(xoff, yoff + j*yspace);
-      ctx.lineTo(xoff + (strings.length-1)*xspace, yoff + j*yspace);
+      ctx.moveTo(xoff + j*xspace, canvas.height - yoff);
+      ctx.lineTo(xoff + j*xspace, canvas.height - (yoff + (strings.length-1)*yspace));
       ctx.stroke();
-      ctx.fillText(j, xoff-15,  yoff + (j - 0.5)*yspace);
+      ctx.fillText(j, xoff + (j - 0.5)*xspace, 5);
     }
 
     // draw notes
-    ctx.textAlign = 'center';
     for (let i = 0; i < strings.length; i++)
     {
-      for (let j = 0; j <= ynum; j++)
+      for (let j = 0; j <= fretnum; j++)
       {
         let note = (strings[i] + j) % 12;
 
@@ -70,18 +71,18 @@ function cFretDraw(canvas, strings, notes)
           ctx.strokeStyle = (note == notes[0]) ? 'white' : 'black';
           ctx.fillStyle   = (note == notes[0]) ? 'red' : 'white';
 
-          ctx.arc(xoff + i*xspace, yoff + (j - 0.5)*yspace, circsize, 0, Math.PI * 2, true);
+          ctx.arc(xoff + (j - 0.5)*xspace, canvas.height - (yoff + i*yspace), circsize, 0, Math.PI * 2, true);
           ctx.fill();
           ctx.stroke();
           
           ctx.fillStyle = ctx.strokeStyle;
-          ctx.fillText(notesNames[note], xoff + i*xspace,  yoff + (j - 0.5)*yspace);
+          ctx.fillText(notesNames[note], xoff + (j - 0.5)*xspace, canvas.height - (yoff + i*yspace));
         }
         else if (j == 0)
         {
           ctx.beginPath();
           ctx.fillStyle = 'grey';
-          ctx.fillText(notesNames[note], xoff + i*xspace,  yoff - 0.5*yspace);
+          ctx.fillText(notesNames[note], xoff - 0.5*xspace, canvas.height - (yoff + i*yspace));
         }
       }
     }
