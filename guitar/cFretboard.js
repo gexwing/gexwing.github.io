@@ -43,6 +43,10 @@ function cFretDraw(canvas, strings, notes)
         ctx.beginPath();
         ctx.arc(xoff + (j - 0.5)*xspace, canvas.height - (yoff + yspace), dotsize, 0, Math.PI * 2, true);
         ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(xoff + (j - 0.5)*xspace, canvas.height - (yoff + (strings.length-2)*yspace), dotsize, 0, Math.PI * 2, true);
+        ctx.fill();
       }
       else if ([3, 5, 7, 9].includes(j % 12))
       {
