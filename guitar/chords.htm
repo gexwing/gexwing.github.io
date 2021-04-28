@@ -4,6 +4,7 @@
   <title>Fretboard Chord Visualizer</title>
   <script type="text/javascript" src="music-data.js"></script>
   <script type="text/javascript" src="cFretboard.js"></script>
+  <script type="text/javascript" src="cKeyboard.js"></script>
   <script type="text/javascript">
 
     function populateFormElements() {
@@ -45,7 +46,6 @@
 
     function update()
     {
-      let canvas = document.getElementById('cFretboard');
       let strings = tunings[document.getElementById("tuning").value];
       let notes = [];
 
@@ -64,7 +64,8 @@
         );
       }
 
-      cFretDraw(canvas, strings, notes);
+      cFretDraw(document.getElementById('cFretboard'), strings, notes);
+      cKeyDraw(document.getElementById('cKeyboard'), notes);
     }
 
     function quickchordsUpdate()
@@ -135,8 +136,9 @@
 
     form#ChordForm div { display: flex; }
     form#ChordForm div select:last-child { flex-grow: 1; }
-    canvas#cFretboard { float:left; margin-left: 50px; }
     form#ChordForm input[type=text] { width: 75%; }
+
+    canvas { float:none; margin-left: 50px; }
   </style>
 
 </head>
@@ -150,7 +152,6 @@
     </div>
     <div>
       <select id="quickchords" size=8 onchange="quickchordSelected(this);";>
-        <!-- <option></option> -->
         <optgroup id="quickchords_basic" label="Basic Chords"></optgroup>
         <optgroup id="quickchords_sus" label="Sus Chords"></optgroup>
         <optgroup id="quickchords_7th" label="7th Chords"></optgroup>
@@ -184,6 +185,9 @@
     </div>
   </form>
   <br />
-  <canvas id="cFretboard"></canvas>
+  <div style="float: left;">
+    <canvas id="cFretboard"></canvas><br />
+    <canvas id="cKeyboard"></canvas>
+</div>
 </body>
 </html>
