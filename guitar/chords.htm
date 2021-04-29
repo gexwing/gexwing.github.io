@@ -66,7 +66,20 @@
       document.getElementById('ChordNoteNames').value = chordnotes.map(i => notesNames[i]);
 
       let notes = document.getElementById('drawSelectScale').checked ? scalenotes : chordnotes;
-      let names = document.getElementById('drawNoteName').checked ? notesNames : intervalNames.rotate(12 - key);
+
+      let names;
+      if (document.getElementById('drawNoteName').checked)
+      {
+        names = notesNames;
+      }
+      else if (document.getElementById('drawNoteScaleInterval').checked)
+      {
+        names = intervalNames.rotate(12 - key);
+      }
+      else if (document.getElementById('drawNoteChordInterval').checked)
+      {
+        names = intervalNames.rotate(12 - root);
+      }
       // TODO: note names in scale not correct as per naming rules
 
       cFretDraw(document.getElementById('cFretboard'), strings, notes, names);
@@ -110,7 +123,6 @@
         update();
       }
     }
-
   </script>
   
   <style type="text/css">
@@ -149,7 +161,6 @@
       margin-left: 50px;
     }
   </style>
-
 </head>
 
 <body onload="prepare();">
@@ -171,7 +182,6 @@
       </select>
     </div>
 
-
     <h3>Chord Select</h3>
     <div>
       <select name="rootnote" id="rootnote"></select>
@@ -185,25 +195,27 @@
     <div>
       <select name="tuning" id="tuning"></select>
     </div>
+    <br />
     <div>
-      <div style="width: 50%;">
         <input type="radio" id="drawSelectScale" name="drawSelect" value="scale" checked>
         <label for="drawSelectScale">Scale</label>
-      </div>
-      <div>
-        <input type="radio" id="drawSelectChord" name="drawSelect" value="chord">
-        <label for="drawSelectChord">Chord </label>
-      </div>
     </div>
     <div>
-      <div style="width: 50%;">
-        <input type="radio" id="drawNoteName" name="drawNote" value="name" checked>
-        <label for="drawNoteName">Note</label>
-      </div>
-      <div>
-        <input type="radio" id="drawNoteInterval" name="drawNote" value="interval">
-        <label for="drawNoteInterval">Interval</label>
-      </div>
+        <input type="radio" id="drawSelectChord" name="drawSelect" value="chord">
+        <label for="drawSelectChord">Chord </label>
+    </div>
+    <br />
+    <div>
+      <input type="radio" id="drawNoteName" name="drawNote" value="name" checked>
+      <label for="drawNoteName">Note</label>
+    </div>
+    <div>
+      <input type="radio" id="drawNoteScaleInterval" name="drawNote" value="ScaleInterval">
+      <label for="drawNoteScaleInterval">Scale Interval</label>
+    </div>
+    <div>
+      <input type="radio" id="drawNoteChordInterval" name="drawNote" value="ChordInterval">
+      <label for="drawNoteChordInterval">Chord Interval</label>
     </div>
     <br />
     <div>
