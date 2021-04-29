@@ -36,6 +36,9 @@
       for (const rb of document.querySelectorAll('input[name="drawSelect"]')) {
           if (params.get("drawSelect") == rb.value) { rb.checked = true; }
       };
+      for (const rb of document.querySelectorAll('input[name="drawNote"]')) {
+          if (params.get("drawNote") == rb.value) { rb.checked = true; }
+      };
     };
   
     function prepare()
@@ -64,7 +67,6 @@
 
       let notes = document.getElementById('drawSelectScale').checked ? scalenotes : chordnotes;
       let names = document.getElementById('drawNoteName').checked ? notesNames : intervalNames.rotate(12 - key);
-      // TODO: interval names not offset ..
       // TODO: note names in scale not correct as per naming rules
 
       cFretDraw(document.getElementById('cFretboard'), strings, notes, names);
