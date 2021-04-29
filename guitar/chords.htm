@@ -31,6 +31,7 @@
       popHelper("chord", Object.keys(chords_basic));
       popHelper("chord", Object.keys(chords_sus));
       popHelper("chord", Object.keys(chords_7th));
+      popHelper("chord", Object.keys(chords_extended));
 
       for (const rb of document.querySelectorAll('input[name="drawSelect"]')) {
           if (params.get("drawSelect") == rb.value) { rb.checked = true; }
@@ -44,28 +45,30 @@
       update();
     }
 
+    Array.prototype.rotate = function(n) {
+      n = n % this.length;
+      return this.slice(n, this.length).concat(this.slice(0, n));
+    }
+
     function update()
     {
       let strings = tunings[document.getElementById("tuning").value];
-      let notes = [];
 
-      if (document.getElementById('drawSelectScale').checked)
-      {
-        let key = document.getElementById("key").selectedIndex;
-        notes = scales[document.getElementById("scale").value].map(
-          note => (note + key) % 12
-        );
-      }
-      else if (document.getElementById('drawSelectChord').checked == true)
-      {
-        let root = document.getElementById("rootnote").selectedIndex;
-        notes = chords_all[document.getElementById("chord").value].map(
-          note => (note + root) % 12
-        );
-      }
+      let key = document.getElementById("key").selectedIndex;
+      let scalenotes = scales[document.getElementById("scale").value].map(note => (note + key) % 12);
+      document.getElementById('ScaleNoteNames').value = scalenotes.map(i => notesNames[i]);
 
-      cFretDraw(document.getElementById('cFretboard'), strings, notes);
-      cKeyDraw(document.getElementById('cKeyboard'), notes);
+      let root = document.getElementById("rootnote").selectedIndex;
+      let chordnotes = chords_all[document.getElementById("chord").value].map(note => (note + root) % 12);
+      document.getElementById('ChordNoteNames').value = chordnotes.map(i => notesNames[i]);
+
+      let notes = document.getElementById('drawSelectScale').checked ? scalenotes : chordnotes;
+      let names = document.getElementById('drawNoteName').checked ? notesNames : intervalNames.rotate(12 - key);
+      // TODO: interval names not offset ..
+      // TODO: note names in scale not correct as per naming rules
+
+      cFretDraw(document.getElementById('cFretboard'), strings, notes, names);
+      cKeyDraw(document.getElementById('cKeyboard'), notes, names);
     }
 
     function quickchordsUpdate()
@@ -73,34 +76,24 @@
       let keyoffset = document.getElementById("key").selectedIndex;
       let notes = scales[document.getElementById("scale").value];
 
-      document.getElementById('quickchords_basic').innerText = null;
-      document.getElementById('quickchords_sus').innerText = null;
-      document.getElementById('quickchords_7th').innerText = null;
+      function popHelper(optionid, chordarray)
+      {
+        let element = document.getElementById(optionid);
+        element.innerText = null;
+        for ([root, cname] of findChords(chordarray, notes.map(note => (note + keyoffset) % 12)))
+        {
+          let option = document.createElement("option");
+          option.innerHTML = notesNames[root] + cname;
+          option.dataset.root = root;
+          option.dataset.cname = cname;
+          element.appendChild(option);
+        }
+      };
 
-      for ([root, cname] of findChords(chords_basic, notes.map(note => (note + keyoffset) % 12)))
-      {
-        let option = document.createElement("option");
-        option.innerHTML = notesNames[root] + cname;
-        option.dataset.root = root;
-        option.dataset.cname = cname;
-        document.getElementById("quickchords_basic").appendChild(option);
-      }
-      for ([root, cname] of findChords(chords_sus, notes.map(note => (note + keyoffset) % 12)))
-      {
-        let option = document.createElement("option");
-        option.innerHTML = notesNames[root] + cname;
-        option.dataset.root = root;
-        option.dataset.cname = cname;
-        document.getElementById("quickchords_sus").appendChild(option);
-      }
-      for ([root, cname] of findChords(chords_7th, notes.map(note => (note + keyoffset) % 12)))
-      {
-        let option = document.createElement("option");
-        option.innerHTML = notesNames[root] + cname;
-        option.dataset.root = root;
-        option.dataset.cname = cname;
-        document.getElementById("quickchords_7th").appendChild(option);
-      }
+      popHelper('quickchords_basic', chords_basic);
+      popHelper('quickchords_sus', chords_sus);
+      popHelper('quickchords_7th', chords_7th);
+      popHelper('quickchords_extended', chords_extended);
     }
   
     function quickchordSelected(obj)
@@ -134,11 +127,25 @@
       width: 200px;
     }
 
-    form#ChordForm div { display: flex; }
-    form#ChordForm div select:last-child { flex-grow: 1; }
-    form#ChordForm input[type=text] { width: 75%; }
+    form#ChordForm div {
+      display: flex;
+    }
+  
+    form#ChordForm div select:last-child,
+    form#ChordForm div input:last-child
+    {
+      flex-grow: 1;
+    }
 
-    canvas { float:none; margin-left: 50px; }
+    form#ChordForm input[type=text]
+    {
+      width: 75%;
+    }
+
+    canvas {
+      float:none;
+      margin-left: 50px;
+    }
   </style>
 
 </head>
@@ -151,24 +158,31 @@
       <select name="scale" id="scale" onchange="quickchordsUpdate();"></select>
     </div>
     <div>
+      <input type="text" id="ScaleNoteNames" disabled>
+    </div>
+    <div>
       <select id="quickchords" size=8 onchange="quickchordSelected(this);";>
         <optgroup id="quickchords_basic" label="Basic Chords"></optgroup>
         <optgroup id="quickchords_sus" label="Sus Chords"></optgroup>
         <optgroup id="quickchords_7th" label="7th Chords"></optgroup>
+        <optgroup id="quickchords_extended" label="Extended Chords"></optgroup>
       </select>
     </div>
+
 
     <h3>Chord Select</h3>
     <div>
       <select name="rootnote" id="rootnote"></select>
       <select name="chord" id="chord"></select>
     </div>
+    <div>
+      <input type="text" id="ChordNoteNames" disabled>
+    </div>
 
     <h3>Drawing Options</h3>
     <div>
       <select name="tuning" id="tuning"></select>
     </div>
-    <br />
     <div>
       <div style="width: 50%;">
         <input type="radio" id="drawSelectScale" name="drawSelect" value="scale" checked>
@@ -177,6 +191,16 @@
       <div>
         <input type="radio" id="drawSelectChord" name="drawSelect" value="chord">
         <label for="drawSelectChord">Chord </label>
+      </div>
+    </div>
+    <div>
+      <div style="width: 50%;">
+        <input type="radio" id="drawNoteName" name="drawNote" value="name" checked>
+        <label for="drawNoteName">Note</label>
+      </div>
+      <div>
+        <input type="radio" id="drawNoteInterval" name="drawNote" value="interval">
+        <label for="drawNoteInterval">Interval</label>
       </div>
     </div>
     <br />

@@ -1,5 +1,6 @@
 // todo: note names dependent on key...
 var notesNames = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+var intervalNames = ['P1', 'm2', 'M2', 'm3', 'M3', 'P4', 'd5', 'P5', 'm6', 'M6', 'm7', 'M7'];
 
 var tunings = {
   "Guitar E Standard":  [7, 0, 5, 10, 2, 7],
@@ -40,7 +41,14 @@ var chords_7th = {
   "maj^7b5": [0, 4, 8, 11],
 };
 
-var chords_all = Object.assign({}, chords_basic, chords_sus, chords_7th);
+var chords_extended = {
+  // Extended Chords
+  "^9": [0, 4, 7, 10, 13],
+  "^11": [0, 4, 7, 10, 13, 16],
+  "^13": [0, 4, 7, 10, 13, 16, 19],
+};
+
+var chords_all = Object.assign({}, chords_basic, chords_sus, chords_7th, chords_extended);
 
 // find all possible chords in a set of notes/scale
 function findChords(chorddict, notes)

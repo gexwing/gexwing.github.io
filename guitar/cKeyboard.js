@@ -1,4 +1,4 @@
-function cKeyDraw(canvas, notes)
+function cKeyDraw(canvas, notes, notesNames)
 {
   // keyboard dimensions
   const xsize = 30;

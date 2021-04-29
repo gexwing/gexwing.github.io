@@ -1,4 +1,4 @@
-function cFretDraw(canvas, strings, notes)
+function cFretDraw(canvas, strings, notes, notesNames)
 {
   // fretboard dimensions
   const yspace = 20;
